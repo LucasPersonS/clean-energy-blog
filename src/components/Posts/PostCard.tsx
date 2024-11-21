@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Post, Comment } from '../../app/types/Post';
+import { Post } from '../../app/types/Post';
+import { Comment } from '../../app/types/Comment';
 import PostModal from './PostModal';
 import { AiOutlineLike, AiOutlineDislike, AiOutlineComment } from 'react-icons/ai';
 import FollowButton from '../Utilitarios/FollowButton';
@@ -31,28 +32,30 @@ const PostCard: React.FC<PostCardProps> = ({ post, onVote, onComment, hideCommen
     setIsModalOpen(false);
   };
 
-  // **Added: Function to add a new comment**
-  const addComment = (commentText: string) => {
-    if (commentText.trim() === '') return;
-
-    const newComment: Comment = {
-      id: comments.length + 1, // Consider using UUID for unique IDs in production
-      author: {
-        name: author?.name,
-        email: author?.email,
-        avatarUrl: author?.avatarUrl, // Placeholder avatar
-      },
-      content: commentText,
-      timestamp: new Date().toISOString(),
-    };
-
-    setComments([...comments, newComment]);
+  // **Updated: Function to add a new comment**
+  const addComment = (newComment: Comment) => {
+    setComments((prevComments) => [...prevComments, newComment]);
+    console.log('Updated comments:', comments);
   };
 
-  // Handle adding a comment from the inline form
+  
   const handleAddComment = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    addComment(commentInput.trim());
+    const newComment: Comment = {
+      id: Date.now(),
+      postId: post.id,
+      author: {
+        id: String(author?.id) || "0",
+        nome: author?.nome || 'Anonymous',
+        email: author?.email || 'unknown@example.com',
+        avatarUrl: author?.avatarUrl || '/default-avatar.png',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      content: commentInput.trim(),
+      timestamp: new Date().toISOString(),
+    };
+    addComment(newComment);
     setCommentInput('');
   };
 
@@ -65,14 +68,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, onVote, onComment, hideCommen
         <header className="flex items-center space-x-4">
           <Image
             src={author?.avatarUrl || '/default-avatar.png'}
-            alt={`${author?.name || 'Unknown'}'s avatar`}
+            alt={`${author?.nome || 'Unknown'}'s avatar`}
             width={50}
             height={50}
             className="rounded-full object-cover"
           />
           <div>
             <div className={`flex items-left ${isModalOpen ? 'pointer-events-none' : ''}`}>
-            <h3 className="text-sm font-semibold text-dark-text">{author?.name || 'Desconhecido'}
+            <h3 className="text-sm font-semibold text-dark-text">{author?.nome || 'Desconhecido'}
               <FollowButton
                 isFollowing={author?.isFollowing || false}
                 onFollowChange={(isFollowing) => {

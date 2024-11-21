@@ -1,13 +1,28 @@
-// src/components/HeaderPost.tsx
-import React, { useState } from 'react';
+'use client'
+
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { GoFlame, GoHeart, GoPerson } from "react-icons/go";
+import { GoFlame, GoHeart, GoPerson, GoHome } from "react-icons/go";
 import { HiMenu, HiX } from "react-icons/hi";
 
 const HeaderPost: React.FC = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && storedUser !== 'undefined') {
+      try {
+        const user = JSON.parse(storedUser);
+        setUserName(user.nome);
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage:", error);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -29,7 +44,11 @@ const HeaderPost: React.FC = () => {
           </button>
         </div>
         <nav className="flex flex-col items-start justify-center flex-grow space-y-8">
-          <button onClick={() => router.push('/')} className="flex items-center text-white hover:text-lime-500">
+        <button onClick={() => router.push('/posts')} className="flex items-center text-white hover:text-lime-500">
+            <GoHome size={32} className="mr-2" />
+            <span>Home</span>
+          </button>
+          <button onClick={() => router.push('/quiz')} className="flex items-center text-white hover:text-lime-500">
             <GoFlame size={32} className="mr-2" />
             <span>Quiz</span>
           </button>
@@ -37,9 +56,9 @@ const HeaderPost: React.FC = () => {
             <GoHeart size={32} className="mr-2" />
             <span>Mais Votados</span>
           </button>
-          <button onClick={() => router.push('/auth/login')} className="flex items-center text-white hover:text-lime-500">
+          <button onClick={() => router.push('/profile')} className="flex items-center text-white hover:text-lime-500">
             <GoPerson size={32} className="mr-2" />
-            <span>Perfil</span>
+            <span>{userName || 'Perfil'}</span>
           </button>
         </nav>
       </header>
@@ -72,9 +91,9 @@ const HeaderPost: React.FC = () => {
               <GoHeart size={24} className="mr-2" />
               <span>Mais Votados</span>
             </button>
-            <button onClick={() => { router.push('/auth/login'); toggleMobileMenu(); }} className="flex items-center text-white hover:text-lime-500">
+            <button onClick={() => { router.push('/profile'); toggleMobileMenu(); }} className="flex items-center text-white hover:text-lime-500">
               <GoPerson size={24} className="mr-2" />
-              <span>Perfil</span>
+              <span>{userName || 'Perfil'}</span>
             </button>
           </div>
         </nav>

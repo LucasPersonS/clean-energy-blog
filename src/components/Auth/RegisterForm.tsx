@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import Notification from '../Utilitarios/Notification'; // Adjust the path if necessary
+import Notification from '../Utilitarios/Notification'; 
+import { getErrorMessage } from '../../utils/errorHandler';
 
 const RegisterForm: React.FC = () => {
     const router = useRouter();
@@ -21,7 +22,7 @@ const RegisterForm: React.FC = () => {
         setNotification(null);
 
         try {
-            const response = await fetch(`http://localhost:5000/api/cadastro`, {
+            const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -41,9 +42,10 @@ const RegisterForm: React.FC = () => {
                 setNotification({ type: 'error', message: dados.error || 'Erro desconhecido' });
                 setError(dados.error || 'Erro desconhecido');
             }
-        } catch (erro) {
-            setNotification({ type: 'error', message: 'Erro ao conectar com a API' });
-            setError('Erro ao conectar com a API');
+        } catch (erro: any) {
+            const errorMessage = getErrorMessage(erro);
+            setNotification({ type: 'error', message: errorMessage });
+            setError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

@@ -2,15 +2,18 @@
 import '../app/globals.css';
 import type { AppProps } from 'next/app';
 import { PostProvider } from '../context/PostContext';
+import { AuthProvider } from '../context/AuthContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <PostProvider>
-      <ErrorBoundary>
-        <Component {...pageProps} />
-      </ErrorBoundary>
-    </PostProvider>
+    <AuthProvider>
+      <PostProvider>
+        <ErrorBoundary>
+          <Component {...pageProps} />
+        </ErrorBoundary>
+      </PostProvider>
+    </AuthProvider>
   );
 }
 

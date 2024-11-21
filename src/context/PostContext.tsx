@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Post } from '../app/types/Post';
 import { Comment } from '../app/types/Comment';
 import { mockPosts } from '../data/mockPosts';
@@ -8,19 +8,41 @@ import { mockPosts } from '../data/mockPosts';
  */
 type PostContextType = {
   posts: Post[];
+  isLoading: boolean;
   updatePost: (updatedPost: Post) => void;
   addPost: (newPost: Post) => void;
   addComment: (postId: number, commentText: string) => void;
   votePost: (postId: number, type: 'like' | 'dislike') => void;
+  loadPosts: () => void;
 };
 
+/**
+ * Create the PostContext with an undefined default value.
+ */
 const PostContext = createContext<PostContextType | undefined>(undefined);
 
 /**
  * PostProvider component that wraps around parts of the app that need access to post state.
  */
 export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  /**
+   * Simulate fetching posts asynchronously.
+   */
+  const loadPosts = () => {
+    setIsLoading(true);
+    // Simulate API call delay
+    setTimeout(() => {
+      setPosts(mockPosts);
+      setIsLoading(false);
+    }, 2000); // 2 seconds delay
+  };
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
 
   /**
    * Updates an existing post.
@@ -50,8 +72,8 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: Date.now(),
       postId,
       author: {
-        id: 'user1',
-        name: 'Lucas',
+        id: '1',
+        nome: 'Lucas',
         email: 'lucas@example.com',
         avatarUrl: '/avatars/avatar1.png',
         createdAt: new Date().toISOString(),
@@ -90,7 +112,9 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <PostContext.Provider value={{ posts, updatePost, addPost, addComment, votePost }}>
+    <PostContext.Provider
+      value={{ posts, isLoading, updatePost, addPost, addComment, votePost, loadPosts }}
+    >
       {children}
     </PostContext.Provider>
   );

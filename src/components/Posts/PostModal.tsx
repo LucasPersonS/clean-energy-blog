@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Post, Comment } from '../../app/types/Post';
+import { Post } from '../../app/types/Post';
+import { Comment } from '../../app/types/Comment';
 import { AiOutlineClose } from 'react-icons/ai';
 import PostCard from './PostCard';
 
 interface PostModalProps {
   post: Post;
   comments: Comment[];
-  addComment: (commentText: string) => void;
+  addComment: (comment: Comment) => void;
   onClose: () => void;
 }
 
 const PostModal: React.FC<PostModalProps> = ({ post, comments, addComment, onClose }) => {
   const [newComment, setNewComment] = useState('');
+
+  // Retrieve the current user's information
+  const storedUser = localStorage.getItem('user');
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
 
   // Close modal on outside click
   const handleOutsideClick = (e: MouseEvent) => {
@@ -39,8 +44,24 @@ const PostModal: React.FC<PostModalProps> = ({ post, comments, addComment, onClo
 
   // Handle adding a new comment
   const handleAddComment = () => {
-    if (newComment.trim() === '') return;
-    addComment(newComment.trim());
+    if (newComment.trim() === '' || !currentUser) return;
+
+    const newCommentObj: Comment = {
+      id: Date.now(), // Use a unique ID generator
+      postId: post.id,
+      author: {
+        id: currentUser.id, // Update this with the actual user ID if available
+        nome: currentUser.nome,
+        email: currentUser.email,
+        avatarUrl: '/avatars/avatar1.png', // Update with actual avatar URL if available
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      content: newComment.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
+    addComment(newCommentObj);
     setNewComment('');
   };
 
@@ -77,11 +98,11 @@ const PostModal: React.FC<PostModalProps> = ({ post, comments, addComment, onClo
                 <div className="flex items-center space-x-3">
                   <img
                     src={comment.author.avatarUrl}
-                    alt={`Avatar de ${comment.author.name}`}
+                    alt={`Avatar de ${comment.author.nome}`}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                   <div>
-                    <span className="font-semibold text-lg">{comment.author.name}</span>
+                    <span className="font-semibold text-lg">{comment.author.nome}</span>
                     <span className="text-sm text-gray-400 ml-2">@{comment.author.email}</span>
                   </div>
                 </div>

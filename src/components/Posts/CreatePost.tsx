@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaImage } from 'react-icons/fa';
 import { usePosts } from '../../context/PostContext';
 import { Post } from '../../app/types/Post';
@@ -37,7 +37,16 @@ const CreatePost: React.FC = () => {
   const { addPost } = usePosts();
   const [tweet, setTweet] = useState('');
   const [image, setImage] = useState<File | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ nome: string; email: string } | null>(null);
   const maxChars = 400;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      setCurrentUser(user);
+    }
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -47,13 +56,13 @@ const CreatePost: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if ((tweet.trim() || image) && tweet.length <= maxChars) {
+    if ((tweet.trim() || image) && tweet.length <= maxChars && currentUser) {
       const newPost: Post = {
         id: Date.now(),
         author: {
           id: 'user40',
-          name: 'LucasPS',
-          email: 'LucasPS@example.com',
+          nome: currentUser.nome,
+          email: currentUser.email,
           avatarUrl: '/avatars/avatar1.png',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -68,7 +77,7 @@ const CreatePost: React.FC = () => {
       setTweet('');
       setImage(null);
     } else {
-      alert('Please provide either text or an image.');
+      alert('Apenas texto ou imagem, por favor.');
     }
   };
 
@@ -117,7 +126,7 @@ const CreatePost: React.FC = () => {
         <CircularProgress maxChars={maxChars} currentChars={tweet.length} />
       </div>
       <div className="flex justify-end items-center mt-3">
-      <span className="text-sm text-gray-400">{tweet.length}/{maxChars}</span>
+        <span className="text-sm text-gray-400">{tweet.length}/{maxChars}</span>
       </div>
       <div className="flex justify-end mt-4">
         <button

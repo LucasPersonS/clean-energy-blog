@@ -3,6 +3,8 @@ import Layout from './Layout';
 import CreatePost from '../../components/Posts/CreatePost';
 import PostList from '../../components/Posts/PostList';
 import Tabs from '../../components/Utilitarios/Tabs';
+import ProtectedRoute from '../../components/ProtectedRoute';
+import { mockPosts } from '../../data/mockPosts';
 
 const PostsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'ForYou' | 'Following'>('ForYou');
@@ -11,16 +13,30 @@ const PostsPage: React.FC = () => {
     setActiveTab(tab);
   };
 
+  const filteredPosts = mockPosts.filter(post => post.author.isFollowing);
+
   return (
-    <Layout>
-      <div className="flex justify-center">
-        <div className="w-full max-w-4xl">
+    <ProtectedRoute>
+      <Layout>
+        <div className="flex justify-center">
+          <div className="w-full max-w-4xl">
             <Tabs activeTab={activeTab} onTabChange={handleTabChange} />
-          <CreatePost />
-          <PostList />
+            {activeTab === 'ForYou' && (
+              <>
+                <CreatePost />
+                <PostList />
+              </>
+            )}
+            {activeTab === 'Following' && (
+              <>
+                <CreatePost />
+                <PostList posts={filteredPosts} />
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
+    </ProtectedRoute>
   );
 };
 

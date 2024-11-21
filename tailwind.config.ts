@@ -11,8 +11,8 @@ const config: Config = {
     extend: {
       colors: {
         twitter: {
-          blue: "#1da1f2",
-          darkBlue: "#0d95e8",
+          blue: "#16a374",
+          darkBlue: "#0c6b43",
           gray: "#657786",
           lightGray: "#aab8c2",
           lighterGray: "#e1e8ed",
@@ -33,8 +33,8 @@ const config: Config = {
         'md-dark': '0 4px 6px rgba(0, 0, 0, 0.5)',
       },
       fontWeight: {
-        thin: 200,
-        extraBold: 800,
+        thin: "200",
+        extraBold: "800",
       },
       fontSize: {
         'title': ['2.25rem', { lineHeight: '2.5rem', fontWeight: '800' }],

@@ -3,7 +3,7 @@ export type Comment = {
   postId: number;
   author: {
     id: string;
-    name: string;
+    nome: string;
     email: string;
     avatarUrl: string;
     createdAt: string;

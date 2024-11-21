@@ -1,24 +1,25 @@
 import React from 'react';
 import Link from 'next/link';
+import { GoSignIn, GoSignOut } from 'react-icons/go';
 
 const Navbar: React.FC = () => {
   const navItems = [
     { name: 'Posts', href: '/posts' },
     { name: 'Votados', href: '/featured' },
     { name: 'Quiz', href: '/quiz' },
-    { name: 'Login', href: '/auth/login' },
-    { name: 'Registrar', href: '/auth/register' },
+    { name: 'Registrar', href: '/auth/register', icon: <GoSignOut /> },
   ];
 
   return (
     <nav>
       <ul className="flex space-x-6">
         {navItems.map((item) => (
-          <li key={item.name}>
+          <li key={item.name} className="flex items-center">
             <Link
               href={item.href}
-              className="text-dark-text hover:text-dark-accent transition-colors font-medium"
+              className="flex items-center text-dark-text hover:text-dark-accent transition-colors font-medium"
             >
+              {item.icon && <span className="mr-2">{item.icon}</span>}
               {item.name}
             </Link>
           </li>

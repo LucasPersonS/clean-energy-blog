@@ -1,4 +1,5 @@
 import { User } from './User';
+import { Comment } from './Comment';
 
 export interface Post {
   id: number;
@@ -9,15 +10,4 @@ export interface Post {
   dislikes: number;
   comments: Comment[];
   // Add other fields as needed
-}
-
-export interface Comment {
-  id: number;
-  author: {
-    name: string;
-    email: string;
-    avatarUrl: string;
-  };
-  content: string;
-  timestamp: string;
 }
