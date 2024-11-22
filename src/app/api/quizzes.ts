@@ -1,4 +1,4 @@
-import { Quiz, ErrorMessage } from '../types';
+import { Quiz, ErrorMessage } from '../types/quiz';
 
 const API_BASE_URL = 'http://localhost:8080'; // Update with your API base URL
 
