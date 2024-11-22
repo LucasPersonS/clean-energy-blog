@@ -3,6 +3,7 @@ import { Post } from '../../app/types/Post';
 import { Comment } from '../../app/types/Comment';
 import { AiOutlineClose } from 'react-icons/ai';
 import PostCard from './PostCard';
+import Skeleton from '../Utilitarios/Skeleton';
 
 interface PostModalProps {
   post: Post;
@@ -13,6 +14,8 @@ interface PostModalProps {
 
 const PostModal: React.FC<PostModalProps> = ({ post, comments, addComment, onClose }) => {
   const [newComment, setNewComment] = useState('');
+  const [isCommentsLoading, setIsCommentsLoading] = useState<boolean>(true);
+  const [loadedComments, setLoadedComments] = useState<Comment[]>([]);
 
   // Retrieve the current user's information
   const storedUser = localStorage.getItem('user');
@@ -31,11 +34,17 @@ const PostModal: React.FC<PostModalProps> = ({ post, comments, addComment, onClo
     // Prevent background scrolling when modal is open
     document.body.style.overflow = 'hidden';
 
+    // Simulate fetching comments
+    setTimeout(() => {
+      setLoadedComments(comments);
+      setIsCommentsLoading(false);
+    }, 1500); // 1.5 seconds delay
+
     return () => {
       window.removeEventListener('click', handleOutsideClick);
       document.body.style.overflow = 'auto';
     };
-  }, []);
+  }, [onClose, comments]);
 
   // Handle input change
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,31 +95,46 @@ const PostModal: React.FC<PostModalProps> = ({ post, comments, addComment, onClo
             onVote={() => {}} 
             onComment={() => {}} 
             hideCommentForm 
+            isLoading={false} // Post is already loaded
           />
         </div>
 
         {/* Comments Section */}
         <div className="mt-6">
           <h4 className="text-xl font-semibold mb-4">Comentários</h4>
-          <ul className="space-y-4 max-h-60 overflow-y-auto pr-2">
-            {comments.map((comment) => (
-              <li key={comment.id} className="border-b border-gray-700 pb-4">
-                <div className="flex items-center space-x-3">
-                  <img
-                    src={comment.author.avatarUrl}
-                    alt={`Avatar de ${comment.author.nome}`}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <span className="font-semibold text-lg">{comment.author.nome}</span>
-                    <span className="text-sm text-gray-400 ml-2">@{comment.author.email}</span>
+          {isCommentsLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="flex items-start space-x-3">
+                  <Skeleton width="40px" height="40px" borderRadius="50%" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton width="30%" height="15px" />
+                    <Skeleton width="80%" height="15px" />
                   </div>
                 </div>
-                <p className="mt-2 text-md text-dark-text break-words">{comment.content}</p>
-                <span className="mt-1 text-xs text-gray-400">{new Date(comment.timestamp).toLocaleString()}</span>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </div>
+          ) : (
+            <ul className="space-y-4 max-h-60 overflow-y-auto pr-2">
+              {loadedComments.map((comment) => (
+                <li key={comment.id} className="border-b border-gray-700 pb-4">
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={comment.author.avatarUrl}
+                      alt={`Avatar de ${comment.author.nome}`}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <span className="font-semibold text-lg">{comment.author.nome}</span>
+                      <span className="text-sm text-gray-400 ml-2">@{comment.author.email}</span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-md text-dark-text break-words">{comment.content}</p>
+                  <span className="mt-1 text-xs text-gray-400">{new Date(comment.timestamp).toLocaleString()}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <form
             onSubmit={(e) => {
               e.preventDefault();

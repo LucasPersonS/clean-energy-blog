@@ -1,23 +1,24 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
+import Skeleton from '../components/Utilitarios/Skeleton';
 
 /**
  * A Higher-Order Component to protect routes from unauthenticated access.
  * @param children - The protected component's children.
  */
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (user === null) {
+    if (!loading && user === null) {
       router.push('/auth/login');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
-  if (user === null) {
-    return <p>Carregando...</p>; // Loading state
+  if (loading) {
+    return <Skeleton />; // Show a loading indicator while checking auth
   }
 
   return <>{children}</>;

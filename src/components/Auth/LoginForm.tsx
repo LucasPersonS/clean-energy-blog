@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import Notification from '../Utilitarios/Notification'; 
 import { useAuth } from '../../context/AuthContext';
-import { getErrorMessage } from '../../utils/errorHandler';
+import Notification from '../Utilitarios/Notification';
+import { getErrorMessage } from '../../app/utils/errorHandler';
+import Skeleton from '../Utilitarios/Skeleton';
 
 const LoginForm: React.FC = () => {
   const router = useRouter();
@@ -12,9 +13,12 @@ const LoginForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<{
-      type: 'success' | 'error';
-      message: string;
+    type: 'success' | 'error';
+    message: string;
   } | null>(null);
+  
+  // State to manage the "Save Login" checkbox
+  const [saveLogin, setSaveLogin] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,14 +38,15 @@ const LoginForm: React.FC = () => {
       const dados = await response.json();
 
       if (response.ok) {
-        login({ 
+        const userData = { 
           nome: dados.nome, 
           email: dados.email, 
           avatarUrl: '/avatars/avatar1.png', 
           id: 'user1', 
           createdAt: '', 
           updatedAt: '' 
-        });
+        };
+        login(userData, saveLogin); // Pass the saveLogin state
         setNotification({ type: 'success', message: dados.message || 'Login realizado com sucesso!' });
         setTimeout(() => {
           router.push('/posts');
@@ -76,6 +81,7 @@ const LoginForm: React.FC = () => {
           placeholder="Email"
           required
           className="w-full p-3 bg-dark-secondary text-dark-text border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-twitter-lime transition"
+          disabled={isLoading}
         />
         <input
           type="password"
@@ -84,16 +90,36 @@ const LoginForm: React.FC = () => {
           placeholder="Senha"
           required
           className="w-full p-3 bg-dark-secondary text-dark-text border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-twitter-lime transition"
+          disabled={isLoading}
         />
+        
+        {/* "Save Login" Checkbox */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="saveLogin"
+            checked={saveLogin}
+            onChange={(e) => setSaveLogin(e.target.checked)}
+            className="mr-2"
+          />
+          <label htmlFor="saveLogin" className="text-sm">
+            Salvar login
+          </label>
+        </div>
+
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
           disabled={isLoading}
           className={`w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition-colors ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            isLoading ? 'opacity-50 cursor-not-allowed flex items-center justify-center' : ''
           }`}
         >
-          {isLoading ? 'Entrando...' : 'Entrar'}
+          {isLoading ? (
+            <Skeleton width="80px" height="24px" borderRadius="9999px" />
+          ) : (
+            'Entrar'
+          )}
         </button>
       </form>
     </div>

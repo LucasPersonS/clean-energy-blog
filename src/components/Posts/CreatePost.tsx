@@ -3,6 +3,7 @@ import { FaImage } from 'react-icons/fa';
 import { usePosts } from '../../context/PostContext';
 import { Post } from '../../app/types/Post';
 import Image from 'next/image';
+import Skeleton from '../Utilitarios/Skeleton';
 
 const CircularProgress: React.FC<{ maxChars: number; currentChars: number }> = ({ maxChars, currentChars }) => {
   const radius = 15;
@@ -38,6 +39,7 @@ const CreatePost: React.FC = () => {
   const [tweet, setTweet] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [currentUser, setCurrentUser] = useState<{ nome: string; email: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const maxChars = 400;
 
   useEffect(() => {
@@ -57,25 +59,30 @@ const CreatePost: React.FC = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if ((tweet.trim() || image) && tweet.length <= maxChars && currentUser) {
-      const newPost: Post = {
-        id: Date.now(),
-        author: {
-          id: 'user40',
-          nome: currentUser.nome,
-          email: currentUser.email,
-          avatarUrl: '/avatars/avatar1.png',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        tweet,
-        image: image ? URL.createObjectURL(image) : undefined,
-        likes: 0,
-        dislikes: 0,
-        comments: [],
-      };
-      addPost(newPost);
-      setTweet('');
-      setImage(null);
+      setIsSubmitting(true);
+      // Simulate API call delay
+      setTimeout(() => {
+        const newPost: Post = {
+          id: Date.now(),
+          author: {
+            id: 'user40',
+            nome: currentUser.nome,
+            email: currentUser.email,
+            avatarUrl: '/avatars/avatar1.png',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          tweet,
+          image: image ? URL.createObjectURL(image) : undefined,
+          likes: 0,
+          dislikes: 0,
+          comments: [],
+        };
+        addPost(newPost);
+        setTweet('');
+        setImage(null);
+        setIsSubmitting(false);
+      }, 1500); // 1.5 seconds delay
     } else {
       alert('Apenas texto ou imagem, por favor.');
     }
@@ -90,6 +97,7 @@ const CreatePost: React.FC = () => {
         className="w-full p-3 bg-dark-primary text-dark-text placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 border border-gray-700 resize-none"
         rows={4}
         maxLength={maxChars}
+        disabled={isSubmitting}
       />
       {image && (
         <div className="mt-4 relative">
@@ -105,6 +113,7 @@ const CreatePost: React.FC = () => {
             onClick={() => setImage(null)}
             className="absolute top-2 right-2 bg-gray-800 bg-opacity-70 text-white rounded-full p-1 hover:bg-opacity-90 transition-colors"
             aria-label="Remove Image"
+            disabled={isSubmitting}
           >
             &times;
           </button>
@@ -121,6 +130,7 @@ const CreatePost: React.FC = () => {
             accept="image/*"
             onChange={handleImageChange}
             className="hidden"
+            disabled={isSubmitting}
           />
         </div>
         <CircularProgress maxChars={maxChars} currentChars={tweet.length} />
@@ -131,10 +141,14 @@ const CreatePost: React.FC = () => {
       <div className="flex justify-end mt-4">
         <button
           type="submit"
-          className="bg-lime-500 text-dark-primary px-6 py-2 rounded-full font-semibold hover:bg-lime-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={tweet.length > maxChars || (!tweet.trim() && !image)}
+          className={`bg-lime-500 text-dark-primary px-6 py-2 rounded-full font-semibold hover:bg-lime-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center`}
+          disabled={tweet.length > maxChars || (!tweet.trim() && !image) || isSubmitting}
         >
-          Postar
+          {isSubmitting ? (
+            <Skeleton width="60px" height="24px" borderRadius="9999px" />
+          ) : (
+            'Postar'
+          )}
         </button>
       </div>
     </form>

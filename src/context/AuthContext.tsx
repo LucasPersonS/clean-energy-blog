@@ -1,89 +1,70 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { User } from '../app/types/User';
-import { useRouter } from 'next/router';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { User, UserContextType } from '../app/types/User';
 
-interface AuthContextType {
-  user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
-  updateUser: (updatedData: Partial<User>) => Promise<void>;
+const AuthContext = createContext<UserContextType | undefined>(undefined);
+
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const router = useRouter();
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
+  // Load user from Local Storage on initial render if available
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    const storedUser = localStorage.getItem('user');
+    if (storedUser && storedUser !== 'undefined') {
+      try {
+        const parsedUser: User = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Failed to parse user from Local Storage:', error);
+        localStorage.removeItem('user');
       }
     }
+    setLoading(false);
   }, []);
 
   /**
-   * Logs in the user by setting the user state and storing it in localStorage.
-   * @param userData - The authenticated user's data.
+   * Logs in the user.
+   * @param userData - The user data to set.
+   * @param saveLogin - If true, saves the user data to localStorage.
    */
-  const loginUser = (userData: User) => {
+  const login = (userData: User, saveLogin: boolean) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-  };
-
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    router.push('/auth/login');
-  };
-
-  /**
-   * Updates the user's profile by calling the internal API route.
-   * @param updatedData - Partial user data to update.
-   */
-  const updateUser = async (updatedData: Partial<User>) => {
-    if (!user) return;
-
-    try {
-      const response = await fetch('/api/auth/profile', { // Internal API route
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to update profile.');
-      }
-
-      setUser(data.user);
-      localStorage.setItem('user', JSON.stringify(data.user));
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      throw error;
+    if (saveLogin) {
+      localStorage.setItem('user', JSON.stringify(userData));
+    } else {
+      localStorage.removeItem('user');
     }
   };
 
+  /**
+   * Logs out the user and clears any saved data.
+   */
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    // Optionally, clear other related data from Local Storage
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login: loginUser, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 /**
- * Custom hook to access AuthContext.
+ * Custom hook to use the AuthContext.
+ * @returns The AuthContext value.
+ * @throws Error if used outside of AuthProvider.
  */
-export const useAuth = () => {
+export const useAuth = (): UserContextType => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within a AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };

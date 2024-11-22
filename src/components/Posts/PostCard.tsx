@@ -5,18 +5,26 @@ import { Comment } from '../../app/types/Comment';
 import PostModal from './PostModal';
 import { AiOutlineLike, AiOutlineDislike, AiOutlineComment } from 'react-icons/ai';
 import FollowButton from '../Utilitarios/FollowButton';
+import Skeleton from '../Utilitarios/Skeleton';
 
 interface PostCardProps {
   post: Post;
   onVote: (type: 'like' | 'dislike') => void;
   onComment: (commentText: string) => void;
   hideCommentForm?: boolean;
+  isLoading?: boolean;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, onVote, onComment, hideCommentForm }) => {
+const PostCard: React.FC<PostCardProps> = ({
+  post,
+  onVote,
+  onComment,
+  hideCommentForm,
+  isLoading = false,
+}) => {
   const { author } = post;
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // **Added: Manage comments state within PostCard**
   const [comments, setComments] = useState<Comment[]>(post.comments);
   const [commentInput, setCommentInput] = useState('');
@@ -38,7 +46,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onVote, onComment, hideCommen
     console.log('Updated comments:', comments);
   };
 
-  
   const handleAddComment = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newComment: Comment = {
@@ -59,6 +66,27 @@ const PostCard: React.FC<PostCardProps> = ({ post, onVote, onComment, hideCommen
     setCommentInput('');
   };
 
+  if (isLoading) {
+    // Display Skeleton PostCard
+    return (
+      <div className="bg-dark-secondary p-6 rounded-2xl shadow-md">
+        <div className="flex items-center space-x-4 mb-4">
+          <Skeleton width="50px" height="50px" borderRadius="50%" />
+          <div className="flex-1 space-y-2">
+            <Skeleton width="30%" height="20px" />
+            <Skeleton width="50%" height="15px" />
+          </div>
+        </div>
+        <Skeleton width="80%" height="20px" className="mt-4" />
+        <Skeleton width="100%" height="150px" className="mt-4" />
+        <div className="flex justify-between items-center mt-6">
+          <Skeleton width="60px" height="20px" />
+          <Skeleton width="50px" height="20px" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div
@@ -75,14 +103,15 @@ const PostCard: React.FC<PostCardProps> = ({ post, onVote, onComment, hideCommen
           />
           <div>
             <div className={`flex items-left ${isModalOpen ? 'pointer-events-none' : ''}`}>
-            <h3 className="text-sm font-semibold text-dark-text">{author?.nome || 'Desconhecido'}
-              <FollowButton
-                isFollowing={author?.isFollowing || false}
-                onFollowChange={(isFollowing) => {
-                  console.log(`User agora está ${isFollowing ? 'Seguindo' : 'Não seguindo'}`);
-                }}
-              />
-            </h3>
+              <h3 className="text-sm font-semibold text-dark-text">
+                {author?.nome || 'Desconhecido'}
+                <FollowButton
+                  isFollowing={author?.isFollowing || false}
+                  onFollowChange={(isFollowing) => {
+                    console.log(`User agora está ${isFollowing ? 'Seguindo' : 'Não seguindo'}`);
+                  }}
+                />
+              </h3>
             </div>
             <p className="text-sm text-gray-400">@{author?.email || 'unknown'}</p>
           </div>

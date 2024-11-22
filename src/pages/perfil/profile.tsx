@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { usePosts } from '../context/PostContext';
-import PostList from '../components/Posts/PostList';
-import CreatePost from '../components/Posts/CreatePost';
-import ImageUploadButton from '../components/Posts/ImageUploadButton';
-import Layout from './posts/Layout';
-import Skeleton from '../components/Utilitarios/Skeleton';
-import { useAuth } from '../context/AuthContext';
+import { usePosts } from '../../context/PostContext';
+import PostList from '../../components/Posts/PostList';
+import CreatePost from '../../components/Posts/CreatePost';
+import ImageUploadButton from '../../components/Posts/ImageUploadButton';
+import Layout from '../posts/Layout';
+import Skeleton from '../../components/Utilitarios/Skeleton';
 
 const ProfilePage: React.FC = () => {
   const router = useRouter();
   const { posts, isLoading: postsLoading } = usePosts();
-  const { user, logout, loading } = useAuth();
   const [userName, setUserName] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [bio, setBio] = useState<string | null>("Essa bio é só um exemplo, você pode editar.");
@@ -24,18 +22,27 @@ const ProfilePage: React.FC = () => {
   const [isProfileLoading, setIsProfileLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!loading) {
-      if (user) {
+    const storedUser = localStorage.getItem('user');
+    const storedImage = localStorage.getItem('profileImage');
+    if (storedUser && storedUser !== 'undefined') {
+      try {
+        const user = JSON.parse(storedUser);
         setUserName(user.nome);
-        setProfileImage(user.avatarUrl);
+        if (storedImage) {
+          setProfileImage(storedImage);
+        }
         setIsProfileLoading(false);
-      } else {
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage:", error);
+        localStorage.removeItem('user');
         router.push('/auth/login');
       }
+    } else {
+      router.push('/auth/login');
     }
-  }, [user, loading, router]);
+  }, [router]);
 
-  if (isProfileLoading || postsLoading || loading) {
+  if (isProfileLoading || postsLoading) {
     return (
       <Layout>
         <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-white px-6 py-8">
@@ -78,7 +85,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-white px-6 py-8">
+      <div className="flex flex-col items-center justify-start min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 text-white px-8 py-12">
         <div className="bg-dark-secondary bg-opacity-80 p-10 rounded-xl shadow-lg w-full max-w-lg">
           <h2 className="text-4xl font-bold mb-8 text-center">Perfil</h2>
           {profileImage ? (
@@ -165,7 +172,8 @@ const ProfilePage: React.FC = () => {
           </button>
           <button
             onClick={() => {
-              logout();
+              localStorage.removeItem('user');
+              localStorage.removeItem('profileImage');
               router.push('/auth/login');
             }}
             className="w-full bg-lime-500 text-dark-primary py-2 px-4 rounded-md hover:bg-lime-600 transition-colors shadow-sm text-sm"

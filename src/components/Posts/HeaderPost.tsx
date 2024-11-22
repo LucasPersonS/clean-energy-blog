@@ -5,28 +5,21 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { GoFlame, GoHeart, GoPerson, GoHome } from "react-icons/go";
 import { HiMenu, HiX } from "react-icons/hi";
+import { useAuth } from '../../context/AuthContext';
+import Skeleton from '../Utilitarios/Skeleton';
 
 const HeaderPost: React.FC = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser && storedUser !== 'undefined') {
-      try {
-        const user = JSON.parse(storedUser);
-        setUserName(user.nome);
-      } catch (error) {
-        console.error("Failed to parse user data from localStorage:", error);
-        localStorage.removeItem('user');
-      }
-    }
-  }, []);
+  const { user, loading } = useAuth();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  if (loading) {
+    return <Skeleton />;
+  }
 
   return (
     <>
@@ -58,7 +51,7 @@ const HeaderPost: React.FC = () => {
           </button>
           <button onClick={() => router.push('/profile')} className="flex items-center text-white hover:text-lime-500">
             <GoPerson size={32} className="mr-2" />
-            <span>{userName || 'Perfil'}</span>
+            <span>{user?.nome || 'Perfil'}</span>
           </button>
         </nav>
       </header>
@@ -93,7 +86,7 @@ const HeaderPost: React.FC = () => {
             </button>
             <button onClick={() => { router.push('/profile'); toggleMobileMenu(); }} className="flex items-center text-white hover:text-lime-500">
               <GoPerson size={24} className="mr-2" />
-              <span>{userName || 'Perfil'}</span>
+              <span>{user?.nome || 'Perfil'}</span>
             </button>
           </div>
         </nav>

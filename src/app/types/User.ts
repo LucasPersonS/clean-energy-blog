@@ -31,8 +31,9 @@ export interface User {
   
   export interface UserContextType {
     user: User | null;
-    login: (user: User) => void;
+    login: (userData: User, saveLogin: boolean) => void;
     logout: () => void;
+    loading: boolean;
   }
 
   export interface User {

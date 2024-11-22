@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Notification from '../Utilitarios/Notification'; 
-import { getErrorMessage } from '../../utils/errorHandler';
+import { getErrorMessage } from '../../app/utils/errorHandler';
 
 const RegisterForm: React.FC = () => {
     const router = useRouter();
