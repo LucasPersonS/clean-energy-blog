@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FaImage } from 'react-icons/fa';
 import { usePosts } from '../../context/PostContext';
 import { Post } from '../../app/types/Post';
 import Image from 'next/image';
 import Skeleton from '../Utilitarios/Skeleton';
+import { useAuth } from '../../context/AuthContext';
 
 const CircularProgress: React.FC<{ maxChars: number; currentChars: number }> = ({ maxChars, currentChars }) => {
   const radius = 15;
@@ -36,19 +37,11 @@ const CircularProgress: React.FC<{ maxChars: number; currentChars: number }> = (
 
 const CreatePost: React.FC = () => {
   const { addPost } = usePosts();
+  const { user } = useAuth();
   const [tweet, setTweet] = useState('');
   const [image, setImage] = useState<File | null>(null);
-  const [currentUser, setCurrentUser] = useState<{ nome: string; email: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const maxChars = 400;
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem('user');
-      const user = storedUser ? JSON.parse(storedUser) : null;
-      setCurrentUser(user);
-    }
-  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -58,17 +51,23 @@ const CreatePost: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if ((tweet.trim() || image) && tweet.length <= maxChars && currentUser) {
+
+    // Debugging Logs
+    console.log('Tweet:', tweet);
+    console.log('Trimmed Tweet:', tweet.trim());
+    console.log('Image:', image);
+    console.log('User:', user);
+
+    if ((tweet.trim() || image) && tweet.trim().length <= maxChars && user) {
       setIsSubmitting(true);
-      // Simulate API call delay
       setTimeout(() => {
         const newPost: Post = {
           id: Date.now(),
           author: {
-            id: 'user40',
-            nome: currentUser.nome,
-            email: currentUser.email,
-            avatarUrl: '/avatars/avatar1.png',
+            id: user.id,
+            nome: user.nome,
+            email: user.email,
+            avatarUrl: user.avatarUrl,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           },
@@ -93,7 +92,7 @@ const CreatePost: React.FC = () => {
       <textarea
         value={tweet}
         onChange={(e) => setTweet(e.target.value)}
-        placeholder="What's happening?"
+        placeholder="O que está acontecendo?"
         className="w-full p-3 bg-dark-primary text-dark-text placeholder-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 border border-gray-700 resize-none"
         rows={4}
         maxLength={maxChars}

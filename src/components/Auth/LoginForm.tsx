@@ -43,10 +43,10 @@ const LoginForm: React.FC = () => {
           email: dados.email, 
           avatarUrl: '/avatars/avatar1.png', 
           id: 'user1', 
-          createdAt: '', 
-          updatedAt: '' 
+          createdAt: new Date().toISOString(), 
+          updatedAt: new Date().toISOString(),
         };
-        login(userData, saveLogin); // Pass the saveLogin state
+        login(userData, saveLogin); // Store user data
         setNotification({ type: 'success', message: dados.message || 'Login realizado com sucesso!' });
         setTimeout(() => {
           router.push('/posts');

@@ -7,6 +7,7 @@ const Navbar: React.FC = () => {
     { name: 'Posts', href: '/posts' },
     { name: 'Votados', href: '/featured' },
     { name: 'Quiz', href: '/quiz' },
+    { name: 'Integrantes', href: '/integrantes' },
     { name: 'Registrar', href: '/auth/register', icon: <GoSignOut /> },
   ];
 
