@@ -79,6 +79,8 @@ Antes de começar, certifique-se de que você tem os seguintes itens instalados 
 
 ## Configuração das APIs
 
+
+## Esse é um projeto para minha faculdade, onde desenvolvi uma API em JAVA, caso queira fazer o teste do blog 100% funcional, me envie uma mensagem para eu te enviar a API.
 O projeto depende de duas APIs externas para funcionalidades de autenticação e quizzes:
 
 1. **API de Autenticação:**
@@ -194,12 +196,3 @@ A estrutura do projeto está organizada da seguinte forma:
 ├── package.json
 ├── next.config.js
 └── tsconfig.json
-
-## Contato
-
-Para qualquer dúvida ou sugestão, entre em contato:
-
-- **LinkedIn:** [Seu LinkedIn](https://linkedin.com/in/lservollo)
-- **GitHub:** [seu-usuario](https://github.com/LucasPersonS)
-
----
